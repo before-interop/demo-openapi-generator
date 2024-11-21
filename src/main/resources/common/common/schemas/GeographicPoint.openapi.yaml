@@ -1,0 +1,40 @@
+openapi: 3.0.3
+
+info:
+  title: GeographicPoint
+  version: 2.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+components:
+  schemas:
+    GeographicPoint:
+      description: A GeographicPoint defines a geographic point through coordinates.
+      type: object
+      required:
+        - x
+        - y
+        - type
+      properties:
+        x:
+          type: number
+          format: double
+          description: |
+            x coordinate (usually Latitude or Easting).
+
+            Correspond à la propriété `coordonneeImmeubleX` de l'IPE.
+        y:
+          type: number
+          format: double
+          description: |
+            y coordinate (usually Longitude or Northing).
+
+            Correspond à la propriété `coordonneeImmeubleY` de l'IPE.
+        z:
+          type: number
+          format: double
+          description: z coordinate (usually Altitude or Elevation).
+        type:
+          type: string
+          description: The type of the coordinates system.

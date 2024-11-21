@@ -1,0 +1,154 @@
+openapi: 3.0.3
+
+info:
+  title: Dynamic filters parameter
+  version: 2.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+components:
+  parameters:
+
+    filters:
+      name: filters
+      in: query
+      description: |
+        The filter criteria.
+
+        key: the name of the property to filter on.
+        value: the value of the property to filter on.
+
+        You can filter on nested properties using the dot notation.
+
+        You can also add complex filters using the following syntax:
+
+        `"{key}[{operator}]": "{value}"`
+
+        where:
+
+        * `key`: the name of the property to filter on.
+        * `operator`: the operator to use for the filter.
+        * `value`: the value to be processed by the operator.
+
+        List of operators:
+
+        * `==`: equals (default)
+
+          alias: `eq`
+
+        * `!=`: not equals
+
+          alias: `ne`, `neq`, `<>`, `!eq`
+
+        * `>`: greater than
+
+          alias: `gt`
+
+        * `>=`: greater than or equals
+
+          alias: `gte`
+
+        * `<`: less than
+
+          alias: `lt`
+
+        * `<=`: less than or equals
+
+          alias: `lte`
+
+        * `=~`: regex match
+
+          alias: `re`, `regex`, `match`
+
+        * `!~`: regex not match
+
+          alias: `nre`, `nregex`, `nmatch`
+
+        * `in`: check if the value is in the list.
+
+          The value must be a comma-separated list of values.
+
+        * `nin`: not in
+
+          alias: `!in`, `notin`
+
+        * `is`: Check the nature of a property.
+
+          alias: `=`
+
+          Allowed values are:
+
+          * `null`: the property must be null
+          * `nnull`: the property must not be null
+          * `empty`: the property must be empty
+          * `nempty`: the property must not be empty
+          * `exists`: the property must exist
+          * `nexists`: the property must not exist
+          * `int`: the property must be an integer
+          * `array`: the property must be an array
+          * `object`: the property must be an object
+          * `string`: the property must be a string
+          * `boolean`: the property must be a boolean
+
+        * `nis`: Inverse of `is` operator
+
+          alias: `!`, `!is`, `nis`, `isnot`, `not`
+
+        * `json`: Check if the property matches a JSON object.
+
+          The value must be a JSON object.
+
+          alias: `j`, `eqjson`
+
+        * `njson`: Check if the property does not match a JSON object.
+
+          The value must be a JSON object.
+
+          alias: `!j`, `njson`, `nejson`, `!json`, `nj`
+
+        ### Example:
+
+        ```
+        {
+            "@type": "MyType",
+            "status[in]": "OPEN,CLOSED",
+            "myarray[nis]": "empty",
+            "relatedEntity.@referredType": "EntityType",
+            "relatedEntity.id": "31546546"
+        }
+        ```
+
+        The generated Url for the previews example will generate the following query string:
+
+        `%40type=MyType&status%5Bin%5D=OPEN%2CCLOSED&myarray%5Bnis%5D=empty&relatedEntity.%40referredType=EntityType&relatedEntity.id=31546546`
+
+
+        ### Example for Json operator:
+
+        ```
+        {
+            "relatedEntity[json]": "{\"@referredType\":\"EntityType\",\"id\":\"31546546\"}"
+        }
+        ```
+
+        The generated Url for the previews example will generate the following query string:
+
+        `relatedEntity%5Bjson%5D=%7B%22%40referredType%22%3A%22EntityType%22%2C%22id%22%3A%2231546546%22%7D`
+
+        ---
+
+      style: form
+      explode: true
+      required: true
+      schema:
+        type: object
+        additionalProperties:
+          not:
+            enum:
+              - offset
+              - sort
+              - limits
+              - fields
+          type: string
+      allowEmptyValue: true

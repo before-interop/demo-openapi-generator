@@ -1,0 +1,260 @@
+openapi: 3.0.3
+
+info:
+  title: Interop
+  version: 2.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+components:
+  schemas:
+    CodeOperateurArcep:
+      description: Code opérateur ARCEP aussi appelé identifiant CE (Identidiant de communications électroniques)
+      type: string
+      pattern: ^[A-Z0-9]{4}$
+      example: FTEL
+
+    PM:
+      description: |
+        Point de Mutualisation.
+
+        Point d'extrémité d'une ou de plusieurs lignes au niveau duquel la personne établissant ou ayant établi
+        dans un immeuble bâti ou exploitant une ligne de communications électroniques à très haut débit en fibre optique
+        donne accès à des opérateurs à ces lignes en vue de fournir des services de communications électroniques
+        aux utilisateurs finals correspondants, conformément à l'article [L. 34-8-3] du code des postes et des communications électroniques.
+
+        [L. 34-8-3]: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043545273
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Identifiant du PM
+          type: string
+          maxLength: 20
+          example: FTEL-PM-00000000000000
+        address:
+          $ref: "./GeographicAddress.openapi.yaml#/components/schemas/GeographicAddress"
+        geographicLocation:
+          description: Coordonnées géographiques du PM.
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/GeographicPoint"
+        status:
+          description: Statut du PM
+          type: string
+          enum:
+            - PLANNED
+            - DEPLOYING
+            - DEPLOYED
+            - ABANDONED
+          example: PLANNED
+        deploymentDate:
+          description: |
+            Date de déploiement du PM.
+
+            Effective si le statut du PM est DEPLOYED.
+            Sinon prévisionnel.
+          type: string
+          format: date
+          example: 2020-01-01
+        commissioningDate:
+          description: |
+            Date de mise en service du PM
+            correspondant à la date de fin du délai de prévenance réglementaire
+            sur le point de mutualisation.
+
+            Effective si le statut du PM est `DEPLOYED`.
+            Sinon prévisionnel.
+          type: string
+          format: date
+          example: 2020-01-01
+        note:
+          description: |
+            Note sur le PM.
+
+            Ce champ permet à l'OI de d'expliciter si besoin la localisation du PM.
+          type: string
+          example: PM en cours de déploiement
+        capacityMax:
+          type: integer
+          description: |
+            Capacité maximale du PM.
+
+            Nombre maximal de lignes pouvant être raccordées au PM.
+            Ce champ est renseigné si le PM est déployé.
+        housingsNumber:
+          type: integer
+          description: |
+            Nombre de lignes raccordées au PM.
+
+            Ce champ est renseigné si le PM est déployé.
+
+    PBO:
+      description: |
+        Point de Branchement Optique.
+
+        Dans les immeubles de plusieurs logements ou locaux à usage professionnel comprenant une colonne montante,
+        équipement généralement situé dans les boîtiers d'étage de la colonne montante qui permet de raccorder le
+        câblage vertical avec le câble de branchement.
+        Le point de branchement optique peut également se trouver à l'extérieur de l'habitat à proximité immédiate
+        du logement; dans ce cas, il permet de raccorder le câblage installé en amont dans le réseau avec le câble
+        de branchement.
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Identifiant du PBO
+          type: string
+          example: FTEL-PBO-00000000000000
+        address:
+          $ref: "./GeographicAddress.openapi.yaml#/components/schemas/GeographicAddress"
+        geographicLocation:
+          description: Coordonnées géographiques du PBO.
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/GeographicPoint"
+        commissioningDate:
+          description: |
+            Date de mise en service du PBO
+            correspondant à la date de fin du délai de prévenance réglementaire
+            sur le point de branchement optique.
+          type: string
+          format: date
+          example: 2020-01-01
+        housingsNumber:
+          description: |
+            Nombre de lignes raccordées au PBO.
+
+            Ce champ est renseigné si le PBO est déployé.
+          type: integer
+        type:
+          type: string
+          description: Type de PBO.
+          example: AERIEN POTEAU ENEDIS
+        connectionType:
+          type: string
+          description: Type de raccordement du PBO.
+          example: IMMEUBLE GOULOTTE OU APPARENT
+
+    PTO:
+      description: |
+        Point de Terminaison Optique.
+
+        Extrémité de la ligne sur laquelle porte l'obligation d'accès imposée
+        par les décisions [n° 2009-1106] et [n° 2010-1312].
+
+        [n° 2009-1106]: https://www.arcep.fr/uploads/tx_gsavis/09-1106.pdf
+        [n° 2010-1312]: https://www.arcep.fr/uploads/tx_gsavis/10-1312.pdf
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Identifiant du PTO
+          type: string
+          example: FTEL-PTO-00000000000000
+        address:
+          $ref: "./GeographicAddress.openapi.yaml#/components/schemas/GeographicAddress"
+        geographicLocation:
+          description: Coordonnées géographiques du PBO.
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/GeographicPoint"
+
+    BuildingId:
+      description: |
+        Identifiant d'un immeuble.
+
+        Ce champ est nommé `IdentifiantImmeuble` dans le fichier IPE.
+      type: string
+      maxLength: 30
+
+    Building:
+      description: Représente un immeuble du fichier IPE.
+      allOf:
+        - $ref: "./Entity.openapi.yaml#/components/schemas/Entity"
+        - properties:
+            id:
+              $ref: "#/components/schemas/BuildingId"
+            address:
+              $ref: "#/components/schemas/BuildingAddress"
+            geographicLocation:
+              description: |
+                Coordonnées géographiques de l'immeuble.
+
+                Ce champs est l'agrégation des champs suivant du fichier IPE:
+                * `TypeProjectionGeographique`
+                * `CoordonneeImmeubleX`
+                * `CoordonneeImmeubleY`
+              type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/GeographicPoint"
+            name:
+              description: |
+                Nom du bâtiment.
+
+                Ce champ est nommé `BatimentImmeuble` dans le fichier IPE.
+              type: string
+            type:
+              description: |
+                Type d'immeuble.
+
+                Ce champ est nommé `TypeImmeuble` dans le fichier IPE.
+              type: string
+              enum:
+                - PAVILLON
+                - IMMEUBLE
+            housingsNumber:
+              description: |
+                Nombre de logements cibles de l'immeuble.
+
+                Ce champ est nommé `NombreLogementsAdresseIPE` dans le fichier IPE.
+              type: integer
+            pm:
+              $ref: "#/components/schemas/PM"
+            pbos:
+              description: Liste des PBOs du bâtiment.
+              type: array
+              items:
+                $ref: "#/components/schemas/PBO"
+
+    BuildingAddress:
+      allOf:
+        - $ref: "./GeographicAddress.openapi.yaml#/components/schemas/GeographicAddress"
+        - required:
+            - city
+            - postcode
+            - code_insee
+    GeographicPoint:
+      allOf:
+        - $ref: "./GeographicPoint.openapi.yaml#/components/schemas/GeographicPoint"
+        - properties:
+            type:
+              description: |
+                The type of the coordinates system.
+
+                Allowed values are:
+                * `WGS84`: World Geodetic System 1984 (Longitude/Latitude)
+                    Système de coordonnées utilisé par le GPS.
+                    Il est le système français de référence pour la Guadeloupe et la Martinique.
+                * `RGF93`: (Lambert 93) Réseau Français métropolitain de Géodésie 1993 (Easting/Northing).
+                * `RGFG95`: Réseau Géodésique Français Guyane 1995 (Easting/Northing)
+                * `RGR92`: Réseau Géodésique de la Réunion 1992 (Easting/Northing)
+                * `RGM04`: Réseau Géodésique de Mayotte 2004 (Easting/Northing)
+                * `RGSPM06`: Réseau Géodésique de Saint-Pierre et Miquelon 2006 (Easting/Northing)
+
+                Correspond à la propriété `typeProjection` de l'building.
+              enum:
+                - WGS84
+                - RGF93
+                - RGFG95
+                - RGR92
+                - RGM04
+                - RGSPM06
